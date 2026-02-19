@@ -1,0 +1,17 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# Local data
+parquet_output/
+*.parquet
+
+# Environment variables / secrets
+.env
+
+# OS files
+.DS_Store
+Thumbs.db

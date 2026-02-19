@@ -1,14 +1,12 @@
+import os
 
-SERVER = "34.149.160.16"
-USER = "rperez"
-PASSWORD = "r<1VP8jD5/0#+ZF6"
-
+SERVER = os.environ.get("SQL_SERVER")
+USER = os.environ.get("SQL_USER")
+PASSWORD = os.environ.get("SQL_PASSWORD")
 
 DATABASE_TABLES = {
     "DWH_SPLGNMX": [
         "dbo.DimTractorHistorico",
-        "dbo.DimOperador",
-        "dbo.FactViajes"
         "dbo.ReporteCartasPorte"
     ],
     "DWH_SPLGNYC": [
@@ -16,6 +14,5 @@ DATABASE_TABLES = {
         "dbo.ReporteCartasPorte"
     ]
 }
-
 
 OUTPUT_BASE = "parquet_output"

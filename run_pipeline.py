@@ -13,8 +13,8 @@ def run(step):
         print(result.stderr)
         raise Exception(f"Error en {step}")
 
-run("extract_all_sqlserver.py")
-run("upload_to_gcs.py")
-run("load_to_bigquery.py")
+run("main.py")            # extrae TODAS las BD DWH
+run("upload_to_gcs.py")   # sube parquet a GCS
+run("load_to_bigquery.py")# carga a BigQuery
 
 print("\n✔ Pipeline completado correctamente")

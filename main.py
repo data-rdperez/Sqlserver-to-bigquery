@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import pyodbc
+import sys
 from config import OUTPUT_BASE
 
 SERVER = os.environ["SQL_SERVER"]
@@ -45,28 +46,49 @@ def extract_table(conn, db, schema, table):
     print(f"✓ Guardado {file_path}")
 
 def main():
-    with pyodbc.connect(CONN_STR) as conn:
-        databases = get_dwh_databases(conn)
+    errores = []
 
-        for db in databases:
-            print(f"\n=== Base de datos: {db} ===")
+    try:
+        with pyodbc.connect(CONN_STR) as conn:
+            databases = get_dwh_databases(conn)
 
-            objects = get_tables_and_views(conn, db)
+            for db in databases:
+                print(f"\n=== Base de datos: {db} ===")
 
-            for _, row in objects.iterrows():
                 try:
-                    extract_table(
-                        conn,
-                        db,
-                        row["TABLE_SCHEMA"],
-                        row["TABLE_NAME"]
-                    )
+                    objects = get_tables_and_views(conn, db)
                 except Exception as e:
-                    print(f"⚠️ Error en {db}.{row['TABLE_SCHEMA']}.{row['TABLE_NAME']}")
-                    print(str(e))
-                    continue   # 🔑 CLAVE: no rompe el pipeline
+                    print(f"❌ No se pudo listar objetos en {db}")
+                    errores.append((db, "LISTADO", str(e)))
+                    continue
 
-    print("\n✔ Extracción completa (con posibles omisiones)")
+                for _, row in objects.iterrows():
+                    try:
+                        extract_table(
+                            conn,
+                            db,
+                            row["TABLE_SCHEMA"],
+                            row["TABLE_NAME"]
+                        )
+                    except Exception as e:
+                        print(f"⚠️ Error en {db}.{row['TABLE_SCHEMA']}.{row['TABLE_NAME']}")
+                        print(str(e))
+                        errores.append((db, row["TABLE_NAME"], str(e)))
+                        continue
+
+    except Exception as e:
+        print("❌ Error crítico no controlado")
+        print(str(e))
+        errores.append(("CRITICO", "-", str(e)))
+
+    print("\n================ RESUMEN ================")
+    print(f"Errores totales: {len(errores)}")
+
+    for err in errores[:20]:
+        print(err)
+
+    print("\n✔ Proceso finalizado (con o sin errores)")
+    return 0   # 🔑 CLAVE ABSOLUTA
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

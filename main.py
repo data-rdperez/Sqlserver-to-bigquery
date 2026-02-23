@@ -1,3 +1,5 @@
+print("Extraccion automatica de TODAS las BD DWH")
+
 import pyodbc
 import pandas as pd
 import pyarrow as pa
